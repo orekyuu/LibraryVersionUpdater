@@ -1,0 +1,28 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version "2.0.1"
+}
+
+group 'net.orekyuu'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+def defaultEncoding = 'UTF-8'
+tasks.withType(AbstractCompile).each { it.options.encoding = defaultEncoding }
+tasks.withType(GroovyCompile).each { it.groovyOptions.encoding = defaultEncoding }
+
+repositories {
+    mavenCentral()
+    jcenter()
+    maven { url = uri("https://plugins.gradle.org/m2/") }
+}
+
+dependencies {
+    compileOnly gradleApi()
+    implementation 'com.github.ben-manes:gradle-versions-plugin:0.20.0'
+    implementation "gradle.plugin.se.patrikerdes:gradle-use-latest-versions-plugin:0.2.3"
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.0.1'
+    implementation group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '5.2.0.201812061821-r'
+
+}
