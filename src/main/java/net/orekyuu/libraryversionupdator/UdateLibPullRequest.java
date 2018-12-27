@@ -1,17 +1,7 @@
 package net.orekyuu.libraryversionupdator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jcraft.jsch.IdentityRepository;
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.Session;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.TransportConfigCallback;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
-import org.eclipse.jgit.transport.*;
-import org.eclipse.jgit.util.FS;
+import org.ajoberstar.grgit.Grgit;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.tasks.TaskAction;
 
@@ -26,7 +16,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Vector;
+import java.util.Collections;
+import java.util.HashSet;
 
 public class UdateLibPullRequest extends DefaultTask {
 
@@ -90,22 +81,21 @@ public class UdateLibPullRequest extends DefaultTask {
     }
 
     private String commitAndPushToRemote(LocalDate now) {
-        try(Repository repository = new FileRepositoryBuilder().readEnvironment().findGitDir(getProject().getRootDir()).build();
-            Git git = new Git(repository)) {
-            String branchName = "update-library-" + now.format(DateTimeFormatter.ofPattern("uuuu-MM-dd"));
-            git.checkout().setCreateBranch(true).setName(branchName).call();
-            git.add().addFilepattern("build.gradle").call();
-            git.commit().setMessage("Update library " + now.format(DateTimeFormatter.ofPattern("uuuu/MM/dd"))).call();
-            git.push().setTransportConfigCallback(new SshTransportConfigCallback()).call();
-
-            return branchName;
-        } catch (IOException | GitAPIException e) {
-            throw new RuntimeException(e);
+        String branchName = "update-library-" + now.format(DateTimeFormatter.ofPattern("uuuu-MM-dd"));
+        try(Grgit grgit = Grgit.open(openOp -> openOp.setDir(getProject().getRootDir()))) {
+            grgit.checkout(op -> {
+                op.setCreateBranch(true);
+                op.setBranch(branchName);
+            });
+            grgit.add(op -> op.setPatterns(new HashSet<>(Collections.singletonList("build.gradle"))));
+            grgit.commit(op -> op.setMessage("Update library " + now.format(DateTimeFormatter.ofPattern("uuuu/MM/dd"))));
+            grgit.push();
         }
+        return branchName;
     }
 
     private void createPullRequest(DependencyReport report, String branch, LocalDate now) throws IOException {
-        URL url = URI.create(githubPage.replaceAll("github.com", "api.github.com/repos") + "/pulls").toURL();
+        URL url = URI.create(githubPage.replaceAll("github\\.com", "api.github.com/repos") + "/pulls").toURL();
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setDoOutput(true);
         connection.setRequestProperty("Authorization", "token " + githubAccessToken);
@@ -126,27 +116,4 @@ public class UdateLibPullRequest extends DefaultTask {
         }
     }
 
-    private static class SshTransportConfigCallback implements TransportConfigCallback {
-
-        private final SshSessionFactory sshSessionFactory = new JschConfigSessionFactory() {
-            @Override
-            protected void configure(OpenSshConfig.Host hc, Session session) {
-                session.setConfig("StrictHostKeyChecking", "no");
-            }
-
-            @Override
-            protected JSch createDefaultJSch(FS fs) throws JSchException {
-                JSch jSch = super.createDefaultJSch(fs);
-                jSch.setConfigRepository(OpenSshConfig.get(fs));
-                return jSch;
-            }
-        };
-
-        @Override
-        public void configure(Transport transport) {
-            SshTransport sshTransport = (SshTransport) transport;
-            sshTransport.setSshSessionFactory(sshSessionFactory);
-        }
-
-    }
 }

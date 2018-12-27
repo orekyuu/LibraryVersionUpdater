@@ -23,6 +23,6 @@ dependencies {
     implementation 'com.github.ben-manes:gradle-versions-plugin:0.20.0'
     implementation "gradle.plugin.se.patrikerdes:gradle-use-latest-versions-plugin:0.2.3"
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.0.1'
-    implementation group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '5.2.0.201812061821-r'
+    implementation group: 'org.ajoberstar', name: 'grgit', version: '2.3.0'
 
 }
