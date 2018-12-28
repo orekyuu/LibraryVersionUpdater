@@ -23,7 +23,7 @@ import java.util.List;
 
 import static se.patrikerdes.Common.getOutDatedDependencies;
 
-public class UdateLibPullRequest extends DefaultTask {
+public class CreateLibUpdatePullRequest extends DefaultTask {
 
     /**
      * GitHub repository url.
