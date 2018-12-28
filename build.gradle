@@ -1,11 +1,10 @@
 plugins {
     id 'java'
-    id 'com.github.johnrengelman.shadow' version "2.0.1"
     id "com.gradle.plugin-publish" version "0.10.0"
 }
 
 group 'net.orekyuu'
-version '1.0.0'
+version '0.0.1'
 
 sourceCompatibility = 1.8
 
@@ -26,24 +25,24 @@ dependencies {
     implementation group: 'org.ajoberstar', name: 'grgit', version: '2.3.0'
 }
 
-// ★プラグインの詳細情報を設定する
 pluginBundle {
-    // ★web サイトの URL
     website = 'https://github.com/orekyuu/LibraryVersionUpdater'
-    // ★コード管理をしているサイトの URL
     vcsUrl = 'https://github.com/orekyuu/LibraryVersionUpdater'
-    // ★説明
     description = 'Update library and create GitHub pull request.'
-    // ★タグ
-    tags = ['github', 'library']
+    tags = ['github']
 
     plugins {
-        // ★プラグインごとの定義
         libraryVersionUpdater {
-            // ★ID（apply plugin: 'xxxxxxx' で指定するやつ）
             id = 'net.orekyuu.libraryversionupdater.LibraryVersionUpdaterPlugin'
-            // ★プラグインの名前
             displayName = 'Library Version Updater'
         }
+    }
+}
+
+jar {
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    } {
+        exclude 'META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA'
     }
 }
