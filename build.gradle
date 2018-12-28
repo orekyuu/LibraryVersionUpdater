@@ -33,7 +33,7 @@ pluginBundle {
 
     plugins {
         libraryVersionUpdater {
-            id = 'net.orekyuu.libraryversionupdater.LibraryVersionUpdaterPlugin'
+            id = 'net.orekyuu.library-version-updater.LibraryVersionUpdaterPlugin'
             displayName = 'Library Version Updater'
         }
     }
