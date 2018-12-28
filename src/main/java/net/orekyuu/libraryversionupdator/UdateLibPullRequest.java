@@ -1,6 +1,5 @@
 package net.orekyuu.libraryversionupdator;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import groovy.json.JsonSlurper;
 import org.ajoberstar.grgit.Grgit;
 import org.gradle.api.DefaultTask;
@@ -115,15 +114,11 @@ public class UdateLibPullRequest extends DefaultTask {
                     "\"body\": \""+ message.toString() +"\"," +
                     "\"head\": \""+branch+"\"," +
                     "\"base\": \"master\"}";
-            System.out.println(json);
             writer.write(json);
             writer.flush();
         }
         String responseMessage = connection.getResponseMessage();
         System.out.println(responseMessage);
-        if (connection.getResponseCode() == 200) {
-            System.out.println("Complete!");
-        }
     }
 
 }
