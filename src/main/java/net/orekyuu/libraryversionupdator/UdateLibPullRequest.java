@@ -1,9 +1,11 @@
 package net.orekyuu.libraryversionupdator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import groovy.json.JsonSlurper;
 import org.ajoberstar.grgit.Grgit;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.tasks.TaskAction;
+import se.patrikerdes.DependencyUpdate;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -18,6 +20,9 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
+
+import static se.patrikerdes.Common.getOutDatedDependencies;
 
 public class UdateLibPullRequest extends DefaultTask {
 
@@ -56,28 +61,23 @@ public class UdateLibPullRequest extends DefaultTask {
             return;
         }
 
-        DependencyReport report = loadDependencyReport();
-        if (report.getOutdated().getDependencies().isEmpty()) {
+        List<DependencyUpdate> dependencyUpdates = loadDependencyReport();
+        if (dependencyUpdates.isEmpty()) {
             System.out.println("Nothing to update.");
             return;
         }
         String branchName = commitAndPushToRemote(now);
         try {
-            createPullRequest(report, branchName, now);
+            createPullRequest(dependencyUpdates, branchName, now);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
 
-    private DependencyReport loadDependencyReport() {
-        try {
-            Path path = Paths.get(getProject().getRootDir().getAbsolutePath(), "build", "dependencyUpdates", "report.json");
-            ObjectMapper mapper = new ObjectMapper();
-            DependencyReport report = mapper.readValue(path.toFile(), DependencyReport.class);
-            return report;
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+    private List<DependencyUpdate> loadDependencyReport() {
+        Path path = Paths.get(getProject().getRootDir().getAbsolutePath(), "build", "dependencyUpdates", "report.json");
+        Object dependencyUpdatesJson = new JsonSlurper().parse(path.toFile());
+        return getOutDatedDependencies(dependencyUpdatesJson);
     }
 
     private String commitAndPushToRemote(LocalDate now) {
@@ -94,15 +94,25 @@ public class UdateLibPullRequest extends DefaultTask {
         return branchName;
     }
 
-    private void createPullRequest(DependencyReport report, String branch, LocalDate now) throws IOException {
+    private void createPullRequest(List<DependencyUpdate> report, String branch, LocalDate now) throws IOException {
         URL url = URI.create(githubPage.replaceAll("github\\.com", "api.github.com/repos") + "/pulls").toURL();
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setDoOutput(true);
         connection.setRequestProperty("Authorization", "token " + githubAccessToken);
         connection.setRequestMethod("POST");
+        String title = "[" + now.format(DateTimeFormatter.ofPattern("uuuu-MM-dd"))+ "] Update library";
+        StringBuilder message = new StringBuilder();
+        message.append("# Updated libraries\\n");
+        message.append("|Name|Version|\\n");
+        message.append("|:--:|:--:|\\n");
+        for (DependencyUpdate it : report) {
+            message.append("|").append(it.groupAndName()).append("|");
+            message.append(it.getOldVersion()).append(" -> ").append(it.getNewVersion()).append("|\\n  ");
+        }
+
         try(BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()))) {
-            String json = "{ \"title\": \""+report.pullRequestTitle(now) +"\", " +
-                    "\"body\": \""+report.pullRequestMessage()+"\"," +
+            String json = "{ \"title\": \""+title +"\", " +
+                    "\"body\": \""+ message.toString() +"\"," +
                     "\"head\": \""+branch+"\"," +
                     "\"base\": \"master\"}";
             System.out.println(json);
