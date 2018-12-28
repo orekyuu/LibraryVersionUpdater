@@ -1,4 +1,4 @@
-package net.orekyuu.libraryversionupdator;
+package net.orekyuu.libraryversionupdater;
 
 import com.github.benmanes.gradle.versions.VersionsPlugin;
 import org.gradle.api.Plugin;

@@ -1,4 +1,4 @@
-package net.orekyuu.libraryversionupdator;
+package net.orekyuu.libraryversionupdater;
 
 import groovy.json.JsonSlurper;
 import org.ajoberstar.grgit.Grgit;
