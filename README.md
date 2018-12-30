@@ -1,6 +1,9 @@
 # Library Version Updater
 build.gradleのライブラリを更新してGitHubにPullRequestを作成します
 
+## Plugin Page
+[LibraryVersionUpdaterPlugin](https://plugins.gradle.org/plugin/net.orekyuu.library-version-updater.LibraryVersionUpdaterPlugin)
+
 ## 設定例
 ```build.gradle
 createLibraryUpdatePR {
