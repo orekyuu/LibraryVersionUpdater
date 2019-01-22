@@ -14,6 +14,7 @@ public class LibraryVersionUpdaterPlugin implements Plugin<Project> {
         project.getTasks().create("createLibraryUpdatePR", CreateLibUpdatePullRequest.class, (task) -> {
             task.setGithubAccessToken("default");
             task.setGithubPage("default");
+            task.setBasedBranchName("master")
             task.dependsOn("useLatestVersions");
         });
     }

@@ -35,6 +35,11 @@ public class CreateLibUpdatePullRequest extends DefaultTask {
      * see: https://github.com/settings/tokens
      */
     private String githubAccessToken;
+    /**
+     * P-R's based branch name on GitHub.
+     * example: master
+     */
+    private String basedBranchName;
 
     public String getGithubPage() {
         return githubPage;
@@ -50,6 +55,14 @@ public class CreateLibUpdatePullRequest extends DefaultTask {
 
     public void setGithubAccessToken(String githubAccessToken) {
         this.githubAccessToken = githubAccessToken;
+    }
+
+    public String getBasedBranchName() {
+        return basedBranchName;
+    }
+
+    public void setBasedBranchName(String basedBranchName) {
+        this.basedBranchName = basedBranchName;
     }
 
     @TaskAction
@@ -113,7 +126,7 @@ public class CreateLibUpdatePullRequest extends DefaultTask {
             String json = "{ \"title\": \""+title +"\", " +
                     "\"body\": \""+ message.toString() +"\"," +
                     "\"head\": \""+branch+"\"," +
-                    "\"base\": \"master\"}";
+                    "\"base\": \""+ basedBranchName +"\"}";
             writer.write(json);
             writer.flush();
         }
