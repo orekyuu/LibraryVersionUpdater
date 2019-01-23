@@ -4,6 +4,9 @@ build.gradleのライブラリを更新してGitHubにPullRequestを作成しま
 ## Plugin Page
 [LibraryVersionUpdaterPlugin](https://plugins.gradle.org/plugin/net.orekyuu.library-version-updater.LibraryVersionUpdaterPlugin)
 
+## 準備
+https://github.com/settings/tokens/new?description=LibraryVersionUpdater%20token で `repo` にチェックを入れてアクセストークンを作成してください
+
 ## 設定例
 ```build.gradle
 createLibraryUpdatePR {
