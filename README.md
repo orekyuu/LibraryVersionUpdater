@@ -9,6 +9,7 @@ build.gradleのライブラリを更新してGitHubにPullRequestを作成しま
 createLibraryUpdatePR {
     githubAccessToken = getProperty("github.token")
     githubPage = "https://github.com/orekyuu/LibraryVersionUpdater"
+    basedBranchName = "master"
 }
 
 // 下の設定を書かないとbetaなどにも更新される
