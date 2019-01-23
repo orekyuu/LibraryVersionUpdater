@@ -1,6 +1,7 @@
 package net.orekyuu.libraryversionupdater;
 
 import groovy.json.JsonSlurper;
+import org.ajoberstar.grgit.Credentials;
 import org.ajoberstar.grgit.Grgit;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.tasks.TaskAction;
@@ -81,7 +82,7 @@ public class CreateLibUpdatePullRequest extends DefaultTask {
 
     private String commitAndPushToRemote(LocalDate now) {
         String branchName = "update-library-" + now.format(DateTimeFormatter.ofPattern("uuuu-MM-dd"));
-        try(Grgit grgit = Grgit.open(openOp -> openOp.setDir(getProject().getRootDir()))) {
+        try(Grgit grgit = openRepository()) {
             grgit.checkout(op -> {
                 op.setCreateBranch(true);
                 op.setBranch(branchName);
@@ -91,6 +92,13 @@ public class CreateLibUpdatePullRequest extends DefaultTask {
             grgit.push();
         }
         return branchName;
+    }
+
+    private Grgit openRepository() {
+        return Grgit.open(op -> {
+            op.setDir(getProject().getRootDir());
+            op.setCreds(new Credentials("token", githubAccessToken));
+        });
     }
 
     private void createPullRequest(List<DependencyUpdate> report, String branch, LocalDate now) throws IOException {
