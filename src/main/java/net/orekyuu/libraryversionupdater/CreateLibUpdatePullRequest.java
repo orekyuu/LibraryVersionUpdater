@@ -99,7 +99,7 @@ public class CreateLibUpdatePullRequest extends DefaultTask {
                 op.setCreateBranch(true);
                 op.setBranch(branchName);
             });
-            grgit.add(op -> op.setPatterns(new HashSet<>(Collections.singletonList("build.gradle"))));
+            grgit.add(op -> op.setPatterns(new HashSet<>(Arrays.asList("build.gradle", "app/build.gradle"))));
             grgit.commit(op -> op.setMessage("Update library " + now.format(DateTimeFormatter.ofPattern("uuuu/MM/dd"))));
             grgit.push();
         }
